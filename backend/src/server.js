@@ -20,24 +20,41 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:5173",
   "https://cmpslink.vercel.app",
-  ...(process.env.CLIENT_URL
-    ? process.env.CLIENT_URL.split(",").map((v) => v.trim())
-    : []),
 ];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin) {
-        return callback(null, true);
-      }
-
-      if (allowedOrigins.includes(origin)) {
+      // Allow requests without an Origin header
+      // and requests from our allowed frontend URLs.
+      if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
       console.log("Blocked CORS origin:", origin);
       return callback(new Error("CORS origin not allowed"));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+// Explicitly handle preflight requests
+app.options("*", cors({
+  origin: allowedOrigins,
+  credentials: true,
+}));
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.log("Blocked CORS origin:", origin);
+        callback(new Error("CORS origin not allowed"));
+      }
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
