@@ -4,8 +4,8 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 
 export default function Login() {
-  const [email, setEmail] = useState("admin@campuslink.local"),
-    [password, setPassword] = useState("Admin@123"),
+  const [email, setEmail] = useState(""),
+    [password, setPassword] = useState(""),
     [error, setError] = useState(""),
     [loading, setLoading] = useState(false);
   const { login } = useAuth();
