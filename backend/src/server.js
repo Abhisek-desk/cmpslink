@@ -1,8 +1,8 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import { connectDB } from "./config/db.js";
 
+import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import studentRoutes from "./routes/studentRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
@@ -25,9 +25,11 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests without an Origin header
-      // and requests from our allowed frontend URLs.
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
@@ -40,37 +42,16 @@ app.use(
   })
 );
 
-// Explicitly handle preflight requests
-app.options("*", cors({
-  origin: allowedOrigins,
-  credentials: true,
-}));
-
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.log("Blocked CORS origin:", origin);
-        callback(new Error("CORS origin not allowed"));
-      }
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
-
 app.use(express.json());
+
 app.use("/uploads", express.static("uploads"));
 
-app.get("/api/health", (_, res) =>
+app.get("/api/health", (req, res) => {
   res.json({
     ok: true,
     service: "CAMPUSLINK API",
-  })
-);
+  });
+});
 
 app.use("/api/auth", authRoutes);
 app.use("/api/students", studentRoutes);
